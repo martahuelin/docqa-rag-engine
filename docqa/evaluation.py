@@ -17,6 +17,7 @@ WRITER_PROMPT = ChatPromptTemplate.from_messages(
         (
             "human",
             "Write one question and its answer that can be answered from the document below. "
+            "The question must name the product it asks about and must make sense without seeing the document. "
             'Reply with JSON with exactly the keys "query" and "answer".\n\nDocument:\n{doc}',
         )
     ]
