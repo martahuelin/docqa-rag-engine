@@ -92,3 +92,12 @@ python -m docqa ask|eval [--debug]
    eval only: evaluation.py
         example writer (ChatOllama, JSON) -> ask -> grader (ChatOllama) -> report
 ```
+
+## Known limitations and production roadmap
+
+This is a course exercise on 8 documents. Two choices would change at larger scale.
+
+- **The same 8B model answers, writes examples and grades.** A model grading its own kind of output tends to favour it (self-preference bias) and reasons poorly on edge cases. A 7/7 result from `eval` should be read with suspicion, not as proof of quality. Generated questions can also be vague: one earlier run produced "What is the name of the article?", which the program rightly failed. In production, use a stronger judge model, grading rubrics with reference answers, or human spot-checks of a sample of results.
+- **Retrieval is an exact scan.** `store.py` computes cosine similarity against every stored vector, which costs O(N·d) per question for N vectors of dimension d. Below a few thousand pieces this is fine, because it always finds the true nearest neighbours and needs no index. At tens of thousands of pieces or more, switch to an approximate nearest-neighbour index (for example HNSW or IVF in FAISS, or a vector database such as Qdrant). That trades a small loss of recall for much lower latency.
+
+Other simplifications: the store is rebuilt in memory at every start (C7a), documents are not split into smaller pieces (C5a), and all pieces go into a single prompt (C8a).
